@@ -63,7 +63,7 @@ input[type=range]{width:100%;accent-color:var(--pr)}
 .sg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}.sg>div{background:#0a1020;border:1px solid var(--line);border-radius:12px;padding:11px 4px}.sg b{font-size:21px;display:block}.sg span{font-size:11px;color:var(--mu)}
 .ms{background:#0a1020;border-radius:12px;padding:9px 11px;margin:6px 0;text-align:left;font-size:13px}.ms b{font-size:16px}.ms .ex{color:var(--mu);margin-top:3px}
 #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);background:#1e293b;border:1px solid var(--line);padding:11px 18px;border-radius:12px;font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:90%;text-align:center}#toast.show{opacity:1;transform:translate(-50%,0)}
-.sr.big{padding:11px 12px;font-size:16px}.sr .mu{min-width:30px}
+.sr.lg{padding:11px 12px;font-size:16px}.sr .mu{min-width:30px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body><div id="app">
 
@@ -270,7 +270,7 @@ async function submit(k,sc){$('rk').textContent=labelOf(k);if(!DB_URL)return;con
 let vk=null;
 async function lbShow(k){vk=k;show('lb');$('lbT').textContent=labelOf(k);$('lbS').textContent='Yükleniyor...';$('lbR').innerHTML='';
  const{rows,src}=await lbFetch(k);if(vk!==k)return;$('lbS').textContent=src+` · ${rows.length} oyuncu`+(DB_URL?'':' · ortak tablo için DB_URL ayarlanmamış');
- $('lbR').innerHTML=rows.length?rows.slice(0,20).map((x,i)=>`<div class="sr big ${x.n.toLowerCase()===me.toLowerCase()?'me':''}"><span class="mu">${['🥇','🥈','🥉'][i]||(i+1)+'.'}</span><span class="nm"></span><b>${x.s}</b></div>`).join(''):'<div class="mu sm">Bu tabloda henüz skor yok. İlk rekoru sen kır!</div>';
+ $('lbR').innerHTML=rows.length?rows.slice(0,20).map((x,i)=>`<div class="sr lg ${x.n.toLowerCase()===me.toLowerCase()?'me':''}"><span class="mu">${['🥇','🥈','🥉'][i]||(i+1)+'.'}</span><span class="nm"></span><b>${x.s}</b></div>`).join(''):'<div class="mu sm">Bu tabloda henüz skor yok. İlk rekoru sen kır!</div>';
  $('lbR').querySelectorAll('.nm').forEach((e,i)=>e.textContent=rows[i].n);lbList(k)}
 async function lbList(cur){const ks=new Set(Object.values(store.profiles).flatMap(p=>Object.keys(p.best||{})));
  if(DB_URL)try{const d=await(await fetch(`${DB_URL}/scores.json?shallow=true`)).json();Object.keys(d||{}).forEach(x=>ks.add(x))}catch(e){}
