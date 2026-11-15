@@ -449,7 +449,12 @@ details ul{margin:6px 0 0;padding-left:18px;line-height:1.55}
         <button class="opt sym" data-v="bol" aria-label="Bölme">÷</button>
         <button class="opt sym" data-v="kar" aria-label="Karışık işlem">🎲</button>
       </div>
-      <p class="mu xs" style="margin:10px 0 0">60 sn sabit süre · Çok Zor · 2 basamak. Herkes turu istediği kadar tekrar oynayabilir; en iyi skor sayılır. Aynı numaralı denemede herkes aynı soruları alır.</p>
+      <span class="lb" style="margin-top:12px">Basamak</span>
+      <div class="seg c2" id="nrDig">
+        <button class="opt" data-v="2">2 basamak</button>
+        <button class="opt" data-v="3">3 basamak</button>
+      </div>
+      <p class="mu xs" style="margin:10px 0 0">60 sn sabit süre · Çok Zor · seçtiğin basamak. Herkes turu istediği kadar tekrar oynayabilir; en iyi skor sayılır. Aynı numaralı denemede herkes aynı soruları alır.</p>
       <div class="row" style="gap:8px">
         <button class="btn bg" id="bRdCreate" style="flex:1">Oluştur</button>
         <button class="btn bok" id="bRdCreatePlay" style="flex:1.4">Oluştur ve oyna ▶</button>
@@ -931,7 +936,7 @@ const boardLabel=b=>{const[m,o,d]=b.split('_');return `${MODN[m]||m} · ${OPN[o]
 const BOARD_RE=/^(elle|dy|ek|karisik)_(top|cik|carp|bol|kar)(_3)?$/;
 const COMP_BASE={'2':30,'3':40};
 function compCfg(mode=S.c.mode,op=S.c.op,dig=S.c.digits){dig=String(dig)==='3'?'3':'2';return{comp:true,fmt:'surv',mode,op,diff:4,digits:dig,time:true,base:COMP_BASE[dig],dec:.5,auto:true,board:compBoard(mode,op,dig)}}
-function sprintCfg(mode,op){return{comp:true,fmt:'sprint',mode,op,diff:4,digits:'2',time:true,base:60,dec:0,auto:true,board:'oda'}}
+function sprintCfg(mode,op,dig){return{comp:true,fmt:'sprint',mode,op,diff:4,digits:String(dig)==='3'?'3':'2',time:true,base:60,dec:0,auto:true,board:'oda'}}
 function devCfg(){
   const d=S.d;
   const key=d.mode==='hata'?'d_hata':d.mode==='tablo'?`d_tablo${d.tbl}_${d.time?'t'+d.base+'_'+d.dec:'can'}`:`d_${d.mode}_${OPC[d.op]}_z${d.diff}_b${d.digits}_${d.time?'t'+d.base+'_'+d.dec:'can'}`;
@@ -1200,7 +1205,7 @@ async function lbRender(){
    güncellenir, f=1 olunca ya da 75 sn dolunca donar); g = deneme sayısı; bs,bc,bw = en iyi bitmiş deneme.
    Önceki deneme bitince (ya da süresi dolunca) aynı turu yeniden oynayıp rekor geliştirilebilir. */
 const ROUND_MS=75000;
-const RM={code:null,es:null,d:null,loaded:false,sel:null,sort:'s',lastMine:null,busy:false,nr:{mode:'elle',op:'top'}};
+const RM={code:null,es:null,d:null,loaded:false,sel:null,sort:'s',lastMine:null,busy:false,nr:{mode:'elle',op:'top',dig:2}};
 function roomUnlisten(){if(RM.es){try{RM.es.close()}catch(e){}RM.es=null}}
 function setAt(root,path,val){
   const ks=String(path).split('/').filter(Boolean);
@@ -1314,7 +1319,7 @@ async function createRound(play){
   if(!RM.code||RM.busy)return;
   const name=cleanTitle($('rdName').value);
   if(name.length<2)return toast('Tura 2–30 karakterlik bir ad ver');
-  const id=newRid(),r={name,by:pid(),bn:me,mode:RM.nr.mode,op:RM.nr.op,seed:R(1,2**31-1),ts:SV};
+  const id=newRid(),r={name,by:pid(),bn:me,mode:RM.nr.mode,op:RM.nr.op,dig:RM.nr.dig===3?3:2,seed:R(1,2**31-1),ts:SV};
   RM.busy=true;
   try{await fb(`rooms/${RM.code}/rounds/${id}`,'PUT',r)}
   catch(e){RM.busy=false;return toast('Tur oluşturulamadı')}
@@ -1340,7 +1345,7 @@ async function playRound(id){
   try{await fb(path,'PUT',{n:me,s:0,c:0,w:0,f:0,st:SV,g,bs:prev.bs,bc:prev.bc,bw:prev.bw})}
   catch(e){RM.busy=false;return toast(FB.ok===false?'İnternet bağlantısı yok':'Tur başlatılamadı — önceki denemen hâlâ sürüyor olabilir')}
   RM.busy=false;RM.sel=id;
-  begin(sprintCfg(r.mode,OPR[r.op]||'+'),{seed:attemptSeed(r.seed,g),room:{code:RM.code,rid:id,name:String(r.name||'Tur'),g,prev},at:Date.now()+3000});
+  begin(sprintCfg(r.mode,OPR[r.op]||'+',r.dig),{seed:attemptSeed(r.seed,g),room:{code:RM.code,rid:id,name:String(r.name||'Tur'),g,prev},at:Date.now()+3000});
 }
 async function deleteRound(id){
   try{await fb(`rooms/${RM.code}/res/${id}`,'DELETE');await fb(`rooms/${RM.code}/rounds/${id}`,'DELETE');if(RM.sel===id)RM.sel='total';toast('Tur silindi')}
@@ -1399,7 +1404,7 @@ function renderRoom(){
     else if(isLive(mine))act='<span class="tag ok">● oynuyorsun</span>';
     else{const st=standings(r.id),i=st.findIndex(x=>x.me),b=bestOf(mine);act=`<span class="tag gold" title="En iyi skorun">🏅 ${b.s} · ${i+1}./${st.length}</span><button class="btn bok s" data-play="${esc(r.id)}" title="Rekorunu geliştirmek için tekrar oyna" aria-label="Tekrar oyna">🔁</button>`}
     const canDel=isHost||(String(r.by||'')===pid()&&n<=(mine?1:0));
-    return `<div class="rd${RM.sel===r.id?' sel':''}" data-rid="${esc(r.id)}"><div class="rdm"><b>${MODI[r.mode]||''} ${esc(r.name)}</b><div class="mu xs">${esc(boardLabel(r.mode+'_'+r.op))} · ${n} kişi oynadı · ${esc(r.bn||'?')} açtı</div></div>${act}${canDel?`<button class="del" data-del="${esc(r.id)}" aria-label="Turu sil" title="Turu sil">🗑</button>`:''}</div>`;
+    return `<div class="rd${RM.sel===r.id?' sel':''}" data-rid="${esc(r.id)}"><div class="rdm"><b>${MODI[r.mode]||''} ${esc(r.name)}</b><div class="mu xs">${esc(boardLabel(r.mode+'_'+r.op+(+r.dig===3?'_3':'')))} · ${n} kişi oynadı · ${esc(r.bn||'?')} açtı</div></div>${act}${canDel?`<button class="del" data-del="${esc(r.id)}" aria-label="Turu sil" title="Turu sil">🗑</button>`:''}</div>`;
   }).join(''):'<div class="mu sm" style="margin-top:10px">Henüz tur yok. <b>➕ Yeni tur</b> ile ilkini sen oluştur.</div>';
   /* tablo */
   const sel=RM.sel,sr=rounds.find(r=>r.id===sel);
@@ -1485,12 +1490,14 @@ $('myRooms').addEventListener('click',e=>{const c=e.target.closest('[data-c]');i
 function nrSync(){
   $('nrMode').querySelectorAll('.opt').forEach(b=>b.classList.toggle('on',b.dataset.v===RM.nr.mode));
   $('nrOp').querySelectorAll('.opt').forEach(b=>b.classList.toggle('on',b.dataset.v===RM.nr.op));
+  $('nrDig').querySelectorAll('.opt').forEach(b=>b.classList.toggle('on',+b.dataset.v===RM.nr.dig));
 }
 $('bNewRound').addEventListener('click',()=>{
   const h=$('newRound').classList.toggle('hide');
-  if(!h){RM.nr={mode:S.c.mode,op:OPC[S.c.op]||'top'};nrSync();$('rdName').focus()}
+  if(!h){RM.nr={mode:S.c.mode,op:OPC[S.c.op]||'top',dig:String(S.c.digits)==='3'?3:2};nrSync();$('rdName').focus()}
 });
 $('nrMode').addEventListener('click',e=>{const b=e.target.closest('.opt');if(b){RM.nr.mode=b.dataset.v;nrSync()}});
+$('nrDig').addEventListener('click',e=>{const b=e.target.closest('.opt');if(b){RM.nr.dig=+b.dataset.v;nrSync()}});
 $('nrOp').addEventListener('click',e=>{const b=e.target.closest('.opt');if(b){RM.nr.op=b.dataset.v;nrSync()}});
 $('rdName').addEventListener('keydown',e=>{if(e.key==='Enter')createRound(true)});
 $('bRdCreate').addEventListener('click',()=>createRound(false));
