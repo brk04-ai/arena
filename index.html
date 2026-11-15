@@ -194,6 +194,7 @@ details ul{margin:6px 0 0;padding-left:18px;line-height:1.55}
 .rd .rdm{flex:1;min-width:0}
 .rd .rdm b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rd .btn.s{flex:none}
+.rd .tag{flex:none}
 .rd .del{border:0;background:transparent;color:var(--mu);font-size:15px;cursor:pointer;padding:4px;flex:none}
 .waits{margin-top:10px;font-size:12px;color:var(--mu);line-height:1.5}
 /* tema */
@@ -257,11 +258,16 @@ details ul{margin:6px 0 0;padding-left:18px;line-height:1.55}
         <span class="tag off" id="netTag">○ bağlanıyor</span>
       </div>
       <div class="pills" style="margin-top:8px">
-        <span class="tag">⏱ 30 sn başlangıç</span>
+        <span class="tag" id="cBaseTag">⏱ 30 sn başlangıç</span>
         <span class="tag">+5 sn bonus · her soruda −0.5</span>
-        <span class="tag">🔥 Çok Zor · 2 basamak</span>
+        <span class="tag" id="cDigTag">🔥 Çok Zor · 2 basamak</span>
       </div>
-      <span class="lb" style="margin-top:14px">Stil</span>
+      <span class="lb" style="margin-top:14px">Basamak</span>
+      <div class="seg c2">
+        <button class="opt" data-k="c.digits" data-v="2">2 basamak<small>30 sn başlangıç</small></button>
+        <button class="opt" data-k="c.digits" data-v="3">3 basamak<small>40 sn başlangıç</small></button>
+      </div>
+      <span class="lb" style="margin-top:12px">Stil</span>
       <div class="seg c4">
         <button class="opt" data-k="c.mode" data-v="elle">✍️<small>Yaz</small></button>
         <button class="opt" data-k="c.mode" data-v="dy">✓✕<small>Doğru mu</small></button>
@@ -293,7 +299,7 @@ details ul{margin:6px 0 0;padding-left:18px;line-height:1.55}
 
     <div class="card">
       <span class="lb">⚔️ Yarışma Odaları</span>
-      <p class="mu xs" style="margin:0 0 10px">Oda bir kez kurulur ve kalıcıdır. Kodla giren herkes adlı turlar açabilir. Her tur 60 saniyedir, herkes aynı soruları <b>istediği zaman</b> ve <b>yalnız bir kez</b> çözer.</p>
+      <p class="mu xs" style="margin:0 0 10px">Oda bir kez kurulur ve kalıcıdır. Kodla giren herkes adlı turlar açabilir. Her tur 60 saniyedir. Herkes <b>istediği zaman</b> katılır, rekorunu geliştirmek için turu <b>istediği kadar tekrar oynayabilir</b>; sıralamada <b>en iyi skorun</b> sayılır.</p>
       <div class="row" style="gap:8px">
         <input id="inCode" class="inp c num" inputmode="numeric" maxlength="6" placeholder="Oda kodu" aria-label="Oda kodu" style="letter-spacing:.12em;font-weight:800">
         <button class="btn bc s" id="bJoin" style="padding:14px 20px">Katıl</button>
@@ -443,7 +449,7 @@ details ul{margin:6px 0 0;padding-left:18px;line-height:1.55}
         <button class="opt sym" data-v="bol" aria-label="Bölme">÷</button>
         <button class="opt sym" data-v="kar" aria-label="Karışık işlem">🎲</button>
       </div>
-      <p class="mu xs" style="margin:10px 0 0">60 sn sabit süre · Çok Zor · 2 basamak. Herkes aynı soruları alır, her oyuncu turu bir kez oynar.</p>
+      <p class="mu xs" style="margin:10px 0 0">60 sn sabit süre · Çok Zor · 2 basamak. Herkes turu istediği kadar tekrar oynayabilir; en iyi skor sayılır. Aynı numaralı denemede herkes aynı soruları alır.</p>
       <div class="row" style="gap:8px">
         <button class="btn bg" id="bRdCreate" style="flex:1">Oluştur</button>
         <button class="btn bok" id="bRdCreatePlay" style="flex:1.4">Oluştur ve oyna ▶</button>
@@ -534,6 +540,7 @@ details ul{margin:6px 0 0;padding-left:18px;line-height:1.55}
   <div class="card">
     <span class="lb">Stil</span><div class="pills" id="lbStyle"></div>
     <span class="lb" style="margin-top:12px">İşlem</span><div class="pills" id="lbOp"></div>
+    <span class="lb" style="margin-top:12px">Basamak</span><div class="pills" id="lbDig"><button class="chip" data-v="2">2 basamak</button><button class="chip" data-v="3">3 basamak</button></div>
     <div class="row" style="margin-top:14px;flex-wrap:wrap">
       <div class="pills" id="lbPer"><button class="chip on" data-p="w">Bu hafta</button><button class="chip" data-p="all">Tüm zamanlar</button></div>
       <div class="pills" id="lbSort"><button class="chip on" data-s="s">Puan</button><button class="chip" data-s="c">Doğru</button><button class="chip" data-s="a">Doğruluk</button></div>
@@ -618,7 +625,7 @@ function playTone(t){
 
 /* ================= Depolama & profil ================= */
 const KEY='matArena_v6';
-const DEF={tab:'c',c:{mode:'elle',op:'+'},d:{mode:'elle',op:'+',diff:4,digits:'2',tbl:7,time:true,base:30,dec:0.5,auto:false},snd:true};
+const DEF={tab:'c',c:{mode:'elle',op:'+',digits:'2'},d:{mode:'elle',op:'+',diff:4,digits:'2',tbl:7,time:true,base:30,dec:0.5,auto:false},snd:true};
 let store={profiles:{},last:null,devId:''},me=null,S=clone(DEF),warned=false;
 const P=()=>store.profiles[me];
 function load(){
@@ -778,6 +785,9 @@ function syncUI(){
   $('timeSet').classList.toggle('hide',!S.d.time);
   $('tgTime').checked=!!S.d.time;$('tgAuto').checked=!!S.d.auto;
   $('dec').value=S.d.dec;$('decV').textContent=(+S.d.dec).toFixed(1)+'s';
+  const d3=String(S.c.digits)==='3';
+  $('cBaseTag').textContent=`⏱ ${COMP_BASE[d3?'3':'2']} sn başlangıç`;
+  $('cDigTag').textContent=`🔥 Çok Zor · ${d3?3:2} basamak`;
   if(me){
     const b=compBoard(),pb=P().pb[b];
     $('pbL').textContent='Kişisel rekor · '+boardLabel(b);
@@ -915,10 +925,12 @@ const OPC={'+':'top','−':'cik','×':'carp','÷':'bol',k:'kar'},OPR={top:'+',ci
 const OPN={top:'Toplama',cik:'Çıkarma',carp:'Çarpma',bol:'Bölme',kar:'Karışık işlem'};
 const MODN={elle:'Yaz',dy:'Doğru mu?',ek:'Eksik sayı',karisik:'Karışık'};
 const STYLES=['elle','dy','ek','karisik'],OPS=['top','cik','carp','bol','kar'];
-const compBoard=(mode=S.c.mode,op=S.c.op)=>`${mode}_${OPC[op]}`;
-const boardLabel=b=>{const[m,o]=b.split('_');return `${MODN[m]||m} · ${OPN[o]||o}`};
-const BOARD_RE=/^(elle|dy|ek|karisik)_(top|cik|carp|bol|kar)$/;
-function compCfg(mode=S.c.mode,op=S.c.op){return{comp:true,fmt:'surv',mode,op,diff:4,digits:'2',time:true,base:30,dec:.5,auto:true,board:compBoard(mode,op)}}
+/* Tablo anahtarı: 2 basamak → stil_işlem · 3 basamak → stil_işlem_3 (ayrı sıralama) */
+const compBoard=(mode=S.c.mode,op=S.c.op,dig=S.c.digits)=>`${mode}_${OPC[op]}${String(dig)==='3'?'_3':''}`;
+const boardLabel=b=>{const[m,o,d]=b.split('_');return `${MODN[m]||m} · ${OPN[o]||o}${d==='3'?' · 3 basamak':''}`};
+const BOARD_RE=/^(elle|dy|ek|karisik)_(top|cik|carp|bol|kar)(_3)?$/;
+const COMP_BASE={'2':30,'3':40};
+function compCfg(mode=S.c.mode,op=S.c.op,dig=S.c.digits){dig=String(dig)==='3'?'3':'2';return{comp:true,fmt:'surv',mode,op,diff:4,digits:dig,time:true,base:COMP_BASE[dig],dec:.5,auto:true,board:compBoard(mode,op,dig)}}
 function sprintCfg(mode,op){return{comp:true,fmt:'sprint',mode,op,diff:4,digits:'2',time:true,base:60,dec:0,auto:true,board:'oda'}}
 function devCfg(){
   const d=S.d;
@@ -1069,7 +1081,7 @@ function away(){if(G.run&&G.cfg.comp)G.away=true}
 function back(){if(G.run&&G.cfg.comp&&G.away){G.away=false;G.tabs++;toast('Yarışmada sekme/uygulama değiştirmek soruyu yanlış sayar');answer(null,'tab')}}
 
 function end(r){
-  if(G.cd&&!G.run){stopGame();rngFn=Math.random;if(G.room){liveSend(true);RM.lastMine={s:0,c:0,w:0,best:0,rid:G.room.rid,name:G.room.name};G.room=null;show('room');renderRoom();return}show('menu');renderMenu();return}
+  if(G.cd&&!G.run){stopGame();rngFn=Math.random;if(G.room){liveSend(true);RM.lastMine={s:0,c:0,w:0,best:0,rid:G.room.rid,name:G.room.name,g:G.room.g,pb:G.room.prev.bs};G.room=null;show('room');renderRoom();return}show('menu');renderMenu();return}
   if(!G.run)return;
   G.run=false;clearInterval(tm);rngFn=Math.random;
   $('pz').classList.add('hide');elQc.style.visibility='visible';
@@ -1081,7 +1093,7 @@ function end(r){
   if(C.mode!=='hata'&&n)p.pb[C.board]={s:Math.max(pb.s,G.score),c:Math.max(pb.c,G.c)};
   if(C.comp&&G.c>=3){p.recent.push(Math.round(G.okMs/G.c));if(p.recent.length>10)p.recent.shift()}
   save();
-  if(G.room){liveSend(true);RM.lastMine={s:G.score,c:G.c,w:G.w,best:G.best,rid:G.room.rid,name:G.room.name};G.room=null;show('room');renderRoom();return}
+  if(G.room){liveSend(true);RM.lastMine={s:G.score,c:G.c,w:G.w,best:G.best,rid:G.room.rid,name:G.room.name,g:G.room.g,pb:G.room.prev.bs,rec:improves(G.score,G.c,G.room.prev.bs,G.room.prev.bc)};G.room=null;show('room');renderRoom();return}
 
   $('rs').textContent=G.score;$('r1').textContent=G.c;$('r2').textContent=G.w;$('r3').textContent=G.best;
   $('r4').textContent=n?'%'+Math.round(G.c/n*100):'—';
@@ -1162,17 +1174,17 @@ async function renderPrev(){
   if(seq!==prevSeq)return;
   $('lbPrev').innerHTML=rows.length?rows.slice(0,5).map((x,i)=>rowHtml(x,i,prevSort)).join(''):'<div class="mu sm">Bu hafta bu tabloda henüz skor yok. İlk sen ol!</div>';
 }
-const LB={style:'elle',op:'top',per:'w',sort:'s',seq:0};
+const LB={style:'elle',op:'top',dig:'2',per:'w',sort:'s',seq:0};
 function lbOpen(board){
-  const[m,o]=board.split('_');LB.style=m;LB.op=o;
+  const[m,o,d]=board.split('_');LB.style=m;LB.op=o;LB.dig=d==='3'?'3':'2';
   $('lbStyle').innerHTML=STYLES.map(s=>`<button class="chip" data-v="${s}">${esc(MODN[s])}</button>`).join('');
   $('lbOp').innerHTML=OPS.map(s=>`<button class="chip" data-v="${s}">${OPR[s]==='k'?'🎲 Karışık':OPR[s]+' '+OPN[s]}</button>`).join('');
   show('lb');lbRender();
 }
 async function lbRender(){
   const set=(id,v,attr)=>$(id).querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset[attr]===v));
-  set('lbStyle',LB.style,'v');set('lbOp',LB.op,'v');set('lbPer',LB.per,'p');set('lbSort',LB.sort,'s');
-  const board=`${LB.style}_${LB.op}`,seq=++LB.seq;
+  set('lbStyle',LB.style,'v');set('lbOp',LB.op,'v');set('lbDig',LB.dig,'v');set('lbPer',LB.per,'p');set('lbSort',LB.sort,'s');
+  const board=`${LB.style}_${LB.op}${LB.dig==='3'?'_3':''}`,seq=++LB.seq;
   $('lbS').textContent='Yükleniyor…';$('lbR').innerHTML='';$('lbMe').innerHTML='';
   const{rows,src}=await boardRows(LB.per,board,LB.sort);
   if(seq!==LB.seq)return;
@@ -1184,8 +1196,9 @@ async function lbRender(){
 
 /* ================= Kalıcı yarışma odası ================= */
 /* Veri: rooms/{kod}/meta{host,hn,name,ts} · pl/{pid}{n,j} · rounds/{rid}{name,by,bn,mode,op,seed,ts}
-   res/{rid}/{pid}{n,s,c,w,f,st}. Her oyuncu her turu bir kez oynar: kayıt oyun başında açılır,
-   oyun sürerken güncellenir, f=1 olunca (ya da 75 sn dolunca) donar. */
+   res/{rid}/{pid}{n,s,c,w,f,st,g,bs,bc,bw}: s,c,w,f,st = GÜNCEL deneme (oyun başında açılır, oyun sürerken
+   güncellenir, f=1 olunca ya da 75 sn dolunca donar); g = deneme sayısı; bs,bc,bw = en iyi bitmiş deneme.
+   Önceki deneme bitince (ya da süresi dolunca) aynı turu yeniden oynayıp rekor geliştirilebilir. */
 const ROUND_MS=75000;
 const RM={code:null,es:null,d:null,loaded:false,sel:null,sort:'s',lastMine:null,busy:false,nr:{mode:'elle',op:'top'}};
 function roomUnlisten(){if(RM.es){try{RM.es.close()}catch(e){}RM.es=null}}
@@ -1282,6 +1295,16 @@ function onRoom(){
 /* süresi dolan "oynuyor" kayıtlarını bitmiş saymak için periyodik tazeleme */
 setInterval(()=>{if(RM.code&&RM.d&&$('s-room').classList.contains('on'))renderRoom()},5000);
 const isLive=x=>x&&!x.f&&now()<(+x.st||0)+ROUND_MS;
+/* Sıralamada sayılan değer: en iyi deneme. İlk deneme sürerken canlı skor gösterilir; eski kayıtlar (g yok) olduğu gibi okunur. */
+function bestOf(x){
+  const g=+x.g||0,bs=+x.bs||0;
+  if(g>1||bs>0)return{s:bs,c:+x.bc||0,w:+x.bw||0};
+  return{s:+x.s||0,c:+x.c||0,w:+x.w||0};
+}
+const improves=(s,c,bs,bc)=>s>bs||(s===bs&&c>bc);
+/* k. denemenin soruları: 1. deneme herkes için tur tohumuyla aynı; sonraki denemeler her seferinde yeni (ezberlenemesin),
+   ama aynı numaralı denemede herkes yine aynı soruları alır. */
+const attemptSeed=(seed,g)=>g<=1?(+seed>>>0):(((+seed>>>0)+Math.imul(g-1,0x9E3779B1))>>>0);
 function roundList(){
   const r=(RM.d&&RM.d.rounds)||{};
   return Object.entries(r).filter(([k,v])=>v&&typeof v==='object'&&!BAD_KEYS.has(k)).map(([k,v])=>({...v,id:k})).sort((a,b)=>(+b.ts||0)-(+a.ts||0));
@@ -1303,21 +1326,43 @@ async function createRound(play){
 async function playRound(id){
   const r=((RM.d||{}).rounds||{})[id];
   if(!r||RM.busy)return;
-  if(myRes(id))return toast('Bu turu zaten oynadın — her tur bir kez oynanır');
   RM.busy=true;
-  /* Kayıt oyundan ÖNCE açılır; kurallar ikinci kez açılmasına izin vermez */
-  try{await fb(`rooms/${RM.code}/res/${id}/${pid()}`,'PUT',{n:me,s:0,c:0,w:0,f:0,st:SV})}
-  catch(e){RM.busy=false;return toast(FB.ok===false?'İnternet bağlantısı yok':'Tur başlatılamadı — daha önce oynamış olabilirsin')}
+  const path=`rooms/${RM.code}/res/${id}/${pid()}`;
+  let cur=null;
+  /* Güncel kaydı sunucudan oku: deneme sayısı ve en iyi skor buradan devralınır */
+  try{cur=await fb(path)}catch(e){RM.busy=false;return toast(FB.ok===false?'İnternet bağlantısı yok':'Tur başlatılamadı')}
+  if(cur&&typeof cur==='object'&&isLive(cur)){RM.busy=false;return toast('Bu turda devam eden bir denemen var — bitmesini bekle')}
+  const has=cur&&typeof cur==='object';
+  const legacy=has&&cur.bs==null; /* eski sürümden kalan kayıt: tek denemeyi en iyi say */
+  const g=has?(legacy?1:(+cur.g||0))+1:1;
+  const prev=!has?{bs:0,bc:0,bw:0}:legacy?{bs:+cur.s||0,bc:+cur.c||0,bw:+cur.w||0}:{bs:+cur.bs||0,bc:+cur.bc||0,bw:+cur.bw||0};
+  /* Kayıt oyundan ÖNCE açılır; kurallar önceki deneme bitmeden/süresi dolmadan yenisine izin vermez */
+  try{await fb(path,'PUT',{n:me,s:0,c:0,w:0,f:0,st:SV,g,bs:prev.bs,bc:prev.bc,bw:prev.bw})}
+  catch(e){RM.busy=false;return toast(FB.ok===false?'İnternet bağlantısı yok':'Tur başlatılamadı — önceki denemen hâlâ sürüyor olabilir')}
   RM.busy=false;RM.sel=id;
-  begin(sprintCfg(r.mode,OPR[r.op]||'+'),{seed:(+r.seed)>>>0,room:{code:RM.code,rid:id,name:String(r.name||'Tur')},at:Date.now()+3000});
+  begin(sprintCfg(r.mode,OPR[r.op]||'+'),{seed:attemptSeed(r.seed,g),room:{code:RM.code,rid:id,name:String(r.name||'Tur'),g,prev},at:Date.now()+3000});
 }
 async function deleteRound(id){
   try{await fb(`rooms/${RM.code}/res/${id}`,'DELETE');await fb(`rooms/${RM.code}/rounds/${id}`,'DELETE');if(RM.sel===id)RM.sel='total';toast('Tur silindi')}
   catch(e){toast('Tur silinemedi')}
 }
 function liveSend(final){
-  if(!G.room)return;
-  fb(`rooms/${G.room.code}/res/${G.room.rid}/${pid()}`,'PATCH',{s:G.score,c:G.c,w:G.w,f:final?1:0}).catch(()=>{});
+  const R0=G.room;if(!R0)return;
+  const s0=G.score,c0=G.c,w0=G.w,path=`rooms/${R0.code}/res/${R0.rid}/${pid()}`;
+  if(!final){fb(path,'PATCH',{s:s0,c:c0,w:w0,f:0}).catch(()=>{});return}
+  liveFinal(path,s0,c0,w0);
+}
+/* Deneme bitişi: skoru kilitler ve gerekiyorsa en iyi skoru günceller (ağ hatasında 3 kez dener) */
+async function liveFinal(path,s,c,w){
+  for(let i=0;i<3;i++){
+    try{
+      const cur=await fb(path);
+      if(!cur||typeof cur!=='object'||cur.f===1)return;
+      const bs=+cur.bs||0,bc=+cur.bc||0,bw=+cur.bw||0,up=improves(s,c,bs,bc);
+      await fb(path,'PATCH',{s,c,w,f:1,bs:up?s:bs,bc:up?c:bc,bw:up?w:bw});
+      return;
+    }catch(e){await new Promise(r=>setTimeout(r,700*(i+1)))}
+  }
 }
 const roomSort=(a,b)=>RM.sort==='c'?b.c-a.c||b.s-a.s||a.w-b.w||a.st-b.st:b.s-a.s||b.c-a.c||a.w-b.w||a.st-b.st;
 function standings(view){
@@ -1327,8 +1372,9 @@ function standings(view){
     const e=res[id]||{};
     for(const k in e){
       const x=e[k];if(!x||typeof x!=='object'||BAD_KEYS.has(k))continue;
-      const o=rows[k]||(rows[k]={k,n:String(x.n||'Oyuncu').slice(0,16),s:0,c:0,w:0,r:0,st:+x.st||0,live:false,me:k===pid()});
-      o.s+=+x.s||0;o.c+=+x.c||0;o.w+=+x.w||0;o.r++;
+      const o=rows[k]||(rows[k]={k,n:String(x.n||'Oyuncu').slice(0,16),s:0,c:0,w:0,r:0,g:0,st:+x.st||0,live:false,me:k===pid()});
+      const b=bestOf(x);
+      o.s+=b.s;o.c+=b.c;o.w+=b.w;o.r++;o.g+=+x.g||1;
       if(isLive(x))o.live=true;
     }
   }
@@ -1351,20 +1397,20 @@ function renderRoom(){
     let act;
     if(!mine)act=`<button class="btn bok s" data-play="${esc(r.id)}">▶ Oyna</button>`;
     else if(isLive(mine))act='<span class="tag ok">● oynuyorsun</span>';
-    else{const st=standings(r.id),i=st.findIndex(x=>x.me);act=`<span class="tag gold">✓ ${+mine.s||0} · ${i+1}./${st.length}</span>`}
+    else{const st=standings(r.id),i=st.findIndex(x=>x.me),b=bestOf(mine);act=`<span class="tag gold" title="En iyi skorun">🏅 ${b.s} · ${i+1}./${st.length}</span><button class="btn bok s" data-play="${esc(r.id)}" title="Rekorunu geliştirmek için tekrar oyna" aria-label="Tekrar oyna">🔁</button>`}
     const canDel=isHost||(String(r.by||'')===pid()&&n<=(mine?1:0));
     return `<div class="rd${RM.sel===r.id?' sel':''}" data-rid="${esc(r.id)}"><div class="rdm"><b>${MODI[r.mode]||''} ${esc(r.name)}</b><div class="mu xs">${esc(boardLabel(r.mode+'_'+r.op))} · ${n} kişi oynadı · ${esc(r.bn||'?')} açtı</div></div>${act}${canDel?`<button class="del" data-del="${esc(r.id)}" aria-label="Turu sil" title="Turu sil">🗑</button>`:''}</div>`;
   }).join(''):'<div class="mu sm" style="margin-top:10px">Henüz tur yok. <b>➕ Yeni tur</b> ile ilkini sen oluştur.</div>';
   /* tablo */
   const sel=RM.sel,sr=rounds.find(r=>r.id===sel);
-  $('rTblT').textContent=sr?'📋 '+sr.name:'🏆 Genel sıralama';
+  $('rTblT').textContent=sr?'📋 '+sr.name+' · en iyi skorlar':'🏆 Genel sıralama (turların en iyileri)';
   $('rView').innerHTML=`<button class="chip${sel==='total'?' on':''}" data-v="total">🏆 Genel</button>`+rounds.slice(0,12).map(r=>`<button class="chip${sel===r.id?' on':''}" data-v="${esc(r.id)}">${esc(r.name)}</button>`).join('');
   $('rSort').querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.s===RM.sort));
   const list=standings(sel),tot=sel==='total';
   $('rTbl').innerHTML=list.length?list.map((x,i)=>{
     const dot=x.live?'<span class="st-dot live" title="şu an oynuyor"></span>':'';
     const main=RM.sort==='c'?`${x.c} doğru`:`${x.s}`,sub=RM.sort==='c'?`${x.s} puan`:`${x.c} D · ${x.w} Y`;
-    return `<div class="lr${x.me?' me':''}"><span class="rk">${['🥇','🥈','🥉'][i]||i+1}</span><span class="nm">${dot}${esc(x.n)}${x.me?' <span class="mu">(sen)</span>':''}${tot?` <span class="mu xs">${x.r} tur</span>`:''}</span><span class="v">${main}</span><span class="v2">${sub}</span></div>`;
+    return `<div class="lr${x.me?' me':''}"><span class="rk">${['🥇','🥈','🥉'][i]||i+1}</span><span class="nm">${dot}${esc(x.n)}${x.me?' <span class="mu">(sen)</span>':''}${tot?` <span class="mu xs">${x.r} tur</span>`:x.g>1?` <span class="mu xs">${x.g} deneme</span>`:''}</span><span class="v">${main}</span><span class="v2">${sub}</span></div>`;
   }).join(''):`<div class="mu sm">${rounds.length?'Bu turu henüz kimse oynamadı.':'Tur oynandıkça sıralama burada oluşur.'}</div>`;
   /* podyum: en az 3 sonuç */
   const pod=$('rPodium');
@@ -1381,7 +1427,7 @@ function renderRoom(){
   $('rMine').classList.toggle('hide',!lm);
   if(lm){
     const st=standings(lm.rid),i=st.findIndex(x=>x.me);
-    $('rMine').innerHTML=`<span class="lb">Senin sonucun · ${esc(lm.name)}</span><div class="row"><div class="big" style="font-size:38px;margin:0">${lm.s}</div><div class="pills" style="justify-content:flex-end"><span class="tag ok">${lm.c} doğru</span><span class="tag no">${lm.w} yanlış</span><span class="tag gold">${i>=0?`${i+1}. / ${st.length}`:'sıra hesaplanıyor'}</span></div></div>`;
+    $('rMine').innerHTML=`<span class="lb">Son denemen · ${esc(lm.name)}${lm.g?` · ${lm.g}. deneme`:''}</span><div class="row"><div class="big" style="font-size:38px;margin:0">${lm.s}</div><div class="pills" style="justify-content:flex-end"><span class="tag ok">${lm.c} doğru</span><span class="tag no">${lm.w} yanlış</span><span class="tag gold">${i>=0?`${i+1}. / ${st.length}`:'sıra hesaplanıyor'}</span></div></div>${lm.rec?`<div class="tag gold" style="margin-top:8px">🎉 Yeni kişisel rekor${lm.pb?` (önceki: ${lm.pb})`:''}</div>`:lm.pb?`<div class="mu xs" style="margin-top:8px">Sıralamadaki en iyi skorun: <b>${lm.pb}</b> — geçmek için tekrar oynayabilirsin.</div>`:''}`;
   }
 }
 function renderLiveBar(){
@@ -1410,7 +1456,7 @@ $('tgAuto').addEventListener('change',e=>{S.d.auto=e.target.checked;persist();sy
 $('dec').addEventListener('input',e=>{S.d.dec=+e.target.value;persist();syncUI()});
 $('bStartC').addEventListener('click',()=>begin(compCfg()));
 $('bStartD').addEventListener('click',()=>begin(devCfg()));
-$('bAgain').addEventListener('click',()=>begin(G.cfg.comp?compCfg(G.cfg.mode,G.cfg.op):devCfg()));
+$('bAgain').addEventListener('click',()=>begin(G.cfg.comp?compCfg(G.cfg.mode,G.cfg.op,G.cfg.digits):devCfg()));
 $('bMenu').addEventListener('click',()=>{show('menu');renderMenu()});
 $('bStudy').addEventListener('click',()=>{S.tab='d';S.d.mode='hata';persist();syncUI();begin(devCfg())});
 $('bLb').addEventListener('click',()=>lbOpen(compBoard()));
@@ -1419,6 +1465,7 @@ $('bLbBack').addEventListener('click',()=>{show('menu');renderMenu()});
 $('prevSort').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;prevSort=c.dataset.s;$('prevSort').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c));renderPrev()});
 $('lbStyle').addEventListener('click',e=>{const c=e.target.closest('.chip');if(c){LB.style=c.dataset.v;lbRender()}});
 $('lbOp').addEventListener('click',e=>{const c=e.target.closest('.chip');if(c){LB.op=c.dataset.v;lbRender()}});
+$('lbDig').addEventListener('click',e=>{const c=e.target.closest('.chip');if(c){LB.dig=c.dataset.v;lbRender()}});
 $('lbPer').addEventListener('click',e=>{const c=e.target.closest('.chip');if(c){LB.per=c.dataset.p;lbRender()}});
 $('lbSort').addEventListener('click',e=>{const c=e.target.closest('.chip');if(c){LB.sort=c.dataset.s;lbRender()}});
 $('bSnd').addEventListener('click',()=>{soundOn=!soundOn;S.snd=soundOn;persist();$('bSnd').textContent=soundOn?'🔊':'🔇'});
